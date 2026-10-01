@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Universal de Bases</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Scrollbar estilizado para las explicaciones */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 p-4 md:p-8 flex flex-col items-center">
+
+    <div class="max-w-7xl w-full">
+        
+        <header class="mb-8 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight flex items-center justify-center md:justify-start gap-3">
+                <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                Conversor Universal de Bases Numéricas
+            </h1>
+            <p class="text-slate-500 mt-2 max-w-2xl text-lg">
+                Convierte números enteros y fraccionarios entre cualquier base (2 al 20) visualizando el desglose matemático exacto.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- PANEL IZQUIERDO: Controles -->
+            <div class="lg:col-span-4 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden sticky top-8">
+                <div class="p-6 bg-slate-800 text-white">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        Configuración
+                    </h2>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <!-- Base Origen -->
+                    <div>
+                        <label for="sourceBase" class="block text-sm font-semibold text-slate-700 mb-2">Base Origen</label>
+                        <select id="sourceBase" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-base rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors cursor-pointer">
+                            <!-- Opciones inyectadas por JS -->
+                        </select>
+                    </div>
+
+                    <!-- Base Destino -->
+                    <div>
+                        <label for="targetBase" class="block text-sm font-semibold text-slate-700 mb-2">Base Destino</label>
+                        <select id="targetBase" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-base rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors cursor-pointer">
+                            <!-- Opciones inyectadas por JS -->
+                        </select>
+                    </div>
+
+                    <hr class="border-slate-100">
+
+                    <!-- Valor de Entrada -->
+                    <div>
+                        <label for="inputValue" class="block text-sm font-semibold text-slate-700 mb-2 flex justify-between">
+                            <span>Valor a convertir</span>
+                            <span id="allowedCharsLabel" class="text-xs font-normal text-slate-400"></span>
+                        </label>
+                        <input type="text" id="inputValue" placeholder="Ej: 101.11" autocomplete="off"
+                            class="w-full bg-white border-2 border-slate-300 text-slate-900 text-xl font-mono rounded-xl focus:ring-0 focus:border-indigo-500 block p-4 transition-all uppercase placeholder:text-slate-300 uppercase">
+                    </div>
+
+                    <!-- Resultado Destacado -->
+                    <div class="mt-6 p-4 rounded-xl bg-indigo-50 border border-indigo-100 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <svg class="w-16 h-16 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13h-13L12 6.5z"/></svg>
+                        </div>
+                        <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-1">Resultado Final</label>
+                        <div id="finalResult" class="text-3xl font-bold font-mono text-indigo-700 break-all min-h-[40px]">
+                            ---
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 rounded-xl bg-indigo-50 border border-indigo-100 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <svg class="w-16 h-16 text-indigo-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13h-13L12 6.5z"/></svg>
+                        </div>
+                        <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-1">Profesor: Fernando Agustín Ramírez Mayorga</label>
+                        <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-1">Modelación de sistemas mínimos y arquitecturas computacionales</label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- PANEL DERECHO: Explicación Matemática -->
+            <div class="lg:col-span-8 bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 h-[auto] lg:h-[80vh] flex flex-col">
+                <div class="p-6 border-b border-slate-200 bg-slate-50 rounded-t-2xl flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        Desglose del Procedimiento
+                    </h2>
+                </div>
+
+                <div id="explanationContainer" class="p-6 lg:p-8 overflow-y-auto custom-scrollbar flex-grow bg-white">
+                    
+                    <!-- Estado Vacío -->
+                    <div id="emptyState" class="flex flex-col items-center justify-center h-full text-center py-12">
+                        <div class="bg-slate-100 p-6 rounded-full mb-4">
+                            <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-700 mb-2">Esperando datos</h3>
+                        <p class="text-slate-500 max-w-md">Selecciona las bases e introduce un valor para ver el desarrollo matemático paso a paso con expansión polinomial y divisiones sucesivas.</p>
+                    </div>
+
+                    <!-- Contenedor dinámico -->
+                    <div id="dynamicExplanation" class="hidden space-y-10">
+                        <!-- Step 1 inyectado aquí -->
+                        <div id="step1Container"></div>
+                        
+                        <!-- Separador -->
+                        <div id="separator" class="flex items-center justify-center">
+                            <div class="w-1 h-8 bg-slate-200 rounded-full"></div>
+                        </div>
+
+                        <!-- Step 2 inyectado aquí -->
+                        <div id="step2Container"></div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Alfabeto extendido para bases hasta 36 (usaremos hasta 20 -> A-J)
+        const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        
+        // Elementos del DOM
+        const sourceBaseSelect = document.getElementById('sourceBase');
+        const targetBaseSelect = document.getElementById('targetBase');
+        const inputValue = document.getElementById('inputValue');
+        const allowedCharsLabel = document.getElementById('allowedCharsLabel');
+        const finalResult = document.getElementById('finalResult');
+        
+        const emptyState = document.getElementById('emptyState');
+        const dynamicExplanation = document.getElementById('dynamicExplanation');
+        const step1Container = document.getElementById('step1Container');
+        const step2Container = document.getElementById('step2Container');
+        const separator = document.getElementById('separator');
+
+        // Inicializar opciones de select (2 a 20)
+        function initSelects() {
+            for (let i = 2; i <= 20; i++) {
+                let name = i === 2 ? 'Binario (2)' : 
+                           i === 8 ? 'Octal (8)' : 
+                           i === 10 ? 'Decimal (10)' : 
+                           i === 16 ? 'Hexadecimal (16)' : `Base ${i}`;
+                
+                let option1 = new Option(name, i);
+                let option2 = new Option(name, i);
+                
+                sourceBaseSelect.add(option1);
+                targetBaseSelect.add(option2);
+            }
+            // Valores por defecto
+            sourceBaseSelect.value = "10";
+            targetBaseSelect.value = "2";
+        }
+
+        // Validar y limpiar la entrada del usuario según la base origen
+        function sanitizeInput(raw, base) {
+            const allowed = ALPHABET.substring(0, base);
+            let cleaned = "";
+            let dotSeen = false;
+
+            for (let char of raw.toUpperCase()) {
+                if (allowed.includes(char)) {
+                    cleaned += char;
+                } else if (char === '.' && !dotSeen) {
+                    cleaned += char;
+                    dotSeen = true;
+                }
+            }
+            return cleaned;
+        }
+
+        function updateAllowedCharsLabel() {
+            const base = parseInt(sourceBaseSelect.value);
+            let chars = base <= 10 ? `0-${base - 1}` : `0-9, A-${ALPHABET[base - 1]}`;
+            allowedCharsLabel.textContent = `Válidos: ${chars}`;
+        }
+
+        // Convertir string de cualquier base a Decimal (retorna el valor y el HTML de explicación)
+        function convertToDecimal(str, base) {
+            if (base === 10) return { value: parseFloat(str), html: null };
+            
+            let parts = str.split('.');
+            let intPart = parts[0] || "0";
+            let fracPart = parts[1] || "";
+            
+            let decimalValue = 0;
+            let explanationHTML = `
+                <div class="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 animate-fade-in">
+                    <h3 class="text-lg font-bold text-indigo-900 flex items-center gap-3 mb-4">
+                        <span class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-md">1</span>
+                        Conversión a Base 10 (Expansión Polinomial)
+                    </h3>
+                    <p class="text-sm text-slate-600 mb-4">
+                        Multiplicamos cada dígito (convirtiendo letras a su valor numérico) por la base origen <strong class="text-indigo-600">(${base})</strong> elevada a la posición del dígito.
+                    </p>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 overflow-x-auto">
+                        <div class="font-mono text-sm whitespace-nowrap space-y-2 text-slate-700">
+                            <div class="flex items-center flex-wrap gap-2 leading-loose">
+            `;
+
+            let terms = [];
+            
+            // Enteros
+            for (let i = 0; i < intPart.length; i++) {
+                let char = intPart[i];
+                let val = ALPHABET.indexOf(char);
+                let power = intPart.length - 1 - i;
+                decimalValue += val * Math.pow(base, power);
+                
+                let valStr = val > 9 ? `${char}(${val})` : val;
+                terms.push(`<span class="inline-flex items-center"><span class="font-bold text-slate-900">${valStr}</span><span class="mx-1 text-slate-400">×</span><span class="text-indigo-600 font-semibold">${base}<sup class="text-[10px] ml-0.5">${power}</sup></span></span>`);
+            }
+
+            // Fracciones
+            for (let i = 0; i < fracPart.length; i++) {
+                let char = fracPart[i];
+                let val = ALPHABET.indexOf(char);
+                let power = -(i + 1);
+                decimalValue += val * Math.pow(base, power);
+                
+                let valStr = val > 9 ? `${char}(${val})` : val;
+                terms.push(`<span class="inline-flex items-center"><span class="font-bold text-slate-900">${valStr}</span><span class="mx-1 text-slate-400">×</span><span class="text-emerald-600 font-semibold">${base}<sup class="text-[10px] ml-0.5">${power}</sup></span></span>`);
+            }
+
+            if (terms.length === 0) terms.push("0");
+
+            explanationHTML += terms.join(' <span class="text-slate-300 font-bold mx-1">+</span> ');
+            explanationHTML += `
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <span class="text-slate-500 text-xs uppercase tracking-wide font-sans font-semibold">Valor Intermedio Decimal:</span>
+                                <span class="text-2xl font-bold text-indigo-700">${decimalValue}<sub>10</sub></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return { value: decimalValue, html: explanationHTML };
+        }
+
+        // Convertir de Decimal a cualquier base (retorna string final y HTML de explicación)
+        function convertFromDecimal(decValue, base) {
+            if (base === 10) {
+                // Prevenir notación científica o excesivos decimales en la vista final
+                let resStr = decValue.toString();
+                if(resStr.includes('.')) resStr = decValue.toFixed(8).replace(/\.?0+$/, "");
+                return { result: resStr, html: null };
+            }
+
+            let intPart = Math.floor(decValue);
+            let fracPart = decValue - intPart;
+            let resultInt = "";
+            let resultFrac = "";
+
+            let html = `
+                <div class="bg-emerald-50/50 rounded-2xl p-6 border border-emerald-100 animate-fade-in" style="animation-delay: 0.1s;">
+                    <h3 class="text-lg font-bold text-emerald-900 flex items-center gap-3 mb-4">
+                        <span class="bg-emerald-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-md">2</span>
+                        Conversión a Base Destino (${base})
+                    </h3>
+            `;
+
+            // Parte Entera: Divisiones
+            html += `
+                <div class="mb-6">
+                    <h4 class="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Parte Entera: Divisiones Sucesivas</h4>
+                    <p class="text-xs text-slate-500 mb-3">Dividimos la parte entera entre la base (${base}) hasta que el cociente sea 0. Los residuos leídos de <strong class="text-emerald-700">abajo hacia arriba</strong> forman el número.</p>
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <table class="w-full text-sm text-left font-mono">
+                            <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-4 py-3 border-b border-slate-200">División</th>
+                                    <th class="px-4 py-3 border-b border-slate-200">Cociente</th>
+                                    <th class="px-4 py-3 border-b border-slate-200">Residuo</th>
+                                    <th class="px-4 py-3 border-b border-slate-200">Dígito</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+            `;
+
+            if (intPart === 0) {
+                resultInt = "0";
+                html += `<tr><td class="px-4 py-2">0 ÷ ${base}</td><td class="px-4 py-2">0</td><td class="px-4 py-2">0</td><td class="px-4 py-2 font-bold text-emerald-600">0</td></tr>`;
+            } else {
+                let tempInt = intPart;
+                let steps = [];
+                while (tempInt > 0) {
+                    let quotient = Math.floor(tempInt / base);
+                    let remainder = tempInt % base;
+                    let char = ALPHABET[remainder];
+                    resultInt = char + resultInt; // Prepend
+                    
+                    steps.push(`
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-4 py-2">${tempInt} ÷ ${base}</td>
+                            <td class="px-4 py-2">${quotient}</td>
+                            <td class="px-4 py-2 text-slate-600">${remainder}</td>
+                            <td class="px-4 py-2 font-bold text-emerald-600 text-lg">${char}</td>
+                        </tr>
+                    `);
+                    tempInt = quotient;
+                }
+                html += steps.join('');
+            }
+            html += `</tbody></table></div></div>`;
+
+            // Parte Fraccionaria: Multiplicaciones
+            if (fracPart > 0) {
+                resultFrac = ".";
+                html += `
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Parte Decimal: Multiplicaciones Sucesivas</h4>
+                        <p class="text-xs text-slate-500 mb-3">Multiplicamos la parte decimal por la base (${base}). Tomamos la parte entera resultante leída de <strong class="text-blue-700">arriba hacia abajo</strong>. Se repite hasta que el decimal sea 0 o se alcance un límite.</p>
+                        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                            <table class="w-full text-sm text-left font-mono">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase">
+                                    <tr>
+                                        <th class="px-4 py-3 border-b border-slate-200">Multiplicación</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Resultado</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">P. Entera (Dígito)</th>
+                                        <th class="px-4 py-3 border-b border-slate-200">Nuevo Decimal</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                `;
+
+                let tempFrac = fracPart;
+                let stepsFrac = [];
+                let count = 0;
+                const MAX_FRAC_STEPS = 8; // Prevenir infinitos
+                
+                while (tempFrac > 0 && count < MAX_FRAC_STEPS) {
+                    // Para evitar errores de coma flotante horribles como 0.3 * 3 = 0.89999999
+                    // Usamos toFixed internamente y luego parseFloat
+                    let mul = parseFloat((tempFrac * base).toFixed(10)); 
+                    let digit = Math.floor(mul);
+                    let char = ALPHABET[digit];
+                    resultFrac += char;
+                    
+                    let newFrac = parseFloat((mul - digit).toFixed(10));
+                    
+                    stepsFrac.push(`
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-4 py-2 text-slate-500">0.${tempFrac.toString().split('.')[1] || '0'} × ${base}</td>
+                            <td class="px-4 py-2">${mul}</td>
+                            <td class="px-4 py-2 font-bold text-blue-600 text-lg">${char} ${digit > 9 ? `(${digit})` : ''}</td>
+                            <td class="px-4 py-2 text-slate-600">0.${newFrac.toString().split('.')[1] || '0'}</td>
+                        </tr>
+                    `);
+                    
+                    tempFrac = newFrac;
+                    count++;
+                }
+                
+                html += stepsFrac.join('');
+                html += `</tbody></table>`;
+                if (tempFrac > 0) {
+                    html += `<div class="px-4 py-2 text-xs text-slate-400 bg-slate-50 border-t border-slate-100 italic">... Proceso truncado tras ${MAX_FRAC_STEPS} decimales de precisión.</div>`;
+                }
+                html += `</div></div>`;
+            }
+
+            html += `
+                <div class="mt-6 pt-4 border-t border-emerald-200 flex items-center justify-between">
+                    <span class="text-slate-600 text-sm font-semibold">Concatenando los resultados:</span>
+                    <span class="text-2xl font-bold font-mono text-emerald-700">${resultInt}${resultFrac}</span>
+                </div>
+            </div>`;
+
+            return { result: resultInt + resultFrac, html: html };
+        }
+
+        function processConversion() {
+            const rawVal = inputValue.value;
+            const srcBase = parseInt(sourceBaseSelect.value);
+            const tgtBase = parseInt(targetBaseSelect.value);
+
+            // Sanitizar input
+            const cleanVal = sanitizeInput(rawVal, srcBase);
+            if (rawVal !== cleanVal) {
+                // Guardar posición cursor
+                let pos = inputValue.selectionStart - (rawVal.length - cleanVal.length);
+                inputValue.value = cleanVal;
+                if(pos >= 0) inputValue.setSelectionRange(pos, pos);
+            }
+
+            if (!cleanVal || cleanVal === ".") {
+                finalResult.textContent = "---";
+                emptyState.classList.remove('hidden');
+                dynamicExplanation.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            dynamicExplanation.classList.remove('hidden');
+
+            step1Container.innerHTML = '';
+            step2Container.innerHTML = '';
+            separator.classList.remove('hidden');
+
+            // Caso especial: Misma base
+            if (srcBase === tgtBase) {
+                finalResult.textContent = cleanVal;
+                step1Container.innerHTML = `
+                    <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 text-center animate-fade-in">
+                        <svg class="w-12 h-12 text-slate-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                        <h3 class="text-lg font-bold text-slate-800">Bases Idénticas</h3>
+                        <p class="text-slate-600 mt-2">La base origen y destino son la misma (${srcBase}). No se requiere conversión.</p>
+                    </div>`;
+                separator.classList.add('hidden');
+                return;
+            }
+
+            try {
+                // Paso 1: A Decimal
+                const step1 = convertToDecimal(cleanVal, srcBase);
+                
+                if (srcBase === 10) {
+                    step1Container.innerHTML = `
+                        <div class="bg-indigo-50/50 rounded-xl p-5 border border-indigo-100 animate-fade-in">
+                            <h3 class="font-bold text-indigo-900 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Base de Origen Decimal
+                            </h3>
+                            <p class="text-sm text-slate-600 mt-1">El valor introducido ya se encuentra en Base 10, por lo que podemos usarlo directamente para la conversión final omitiendo el cálculo intermedio.</p>
+                        </div>`;
+                } else {
+                    step1Container.innerHTML = step1.html;
+                }
+
+                // Paso 2: A Base Destino
+                const step2 = convertFromDecimal(step1.value, tgtBase);
+                finalResult.textContent = step2.result;
+
+                if (tgtBase === 10) {
+                    separator.classList.add('hidden'); // Solo un paso
+                    finalResult.textContent = step1.value.toString();
+                } else {
+                    separator.classList.remove('hidden');
+                    step2Container.innerHTML = step2.html;
+                }
+
+            } catch (error) {
+                console.error("Error en conversión:", error);
+                finalResult.textContent = "Error";
+            }
+        }
+
+        // Eventos
+        sourceBaseSelect.addEventListener('change', () => {
+            updateAllowedCharsLabel();
+            processConversion();
+        });
+        
+        targetBaseSelect.addEventListener('change', processConversion);
+        
+        inputValue.addEventListener('input', processConversion);
+
+        // Init
+        initSelects();
+        updateAllowedCharsLabel();
+
+    </script>
+</body>
+</html>
